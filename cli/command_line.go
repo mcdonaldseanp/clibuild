@@ -84,7 +84,8 @@ func printTopUsage(tool_name string, command_list []Command) {
 // If the command succeeds handleCommandAirer exits the whole go process
 // with code 0
 func HandleCommandError(err error, usage string, description string, flagset *flag.FlagSet) {
-	if err != nil {
+	fmt.Printf("\n%T\n", error(err))
+	if error(err) != nil {
 		switch err.(type) {
 		case *clierr.InvalidInput:
 			fmt.Fprintf(os.Stderr, "%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", err, usage, description)
