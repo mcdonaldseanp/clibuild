@@ -1,4 +1,4 @@
-GO_PACKAGES=. ./cli ./clierr ./clivrsn ./validator ./version
+GO_PACKAGES=. ./cli ./clivrsn ./errtype ./validator ./version
 GO_MODULE_NAME=github.com/mcdonaldseanp/clibuild
 GO_BIN_NAME=clibuild
 

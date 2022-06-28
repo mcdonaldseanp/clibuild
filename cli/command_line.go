@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/mcdonaldseanp/clibuild/clierr"
 	"github.com/mcdonaldseanp/clibuild/clivrsn"
+	"github.com/mcdonaldseanp/clibuild/errtype"
 )
 
 type Command struct {
@@ -87,7 +87,7 @@ func HandleCommandError(err error, usage string, description string, flagset *fl
 	fmt.Printf("\n%T\n", error(err))
 	if error(err) != nil {
 		switch err.(type) {
-		case *clierr.InvalidInput:
+		case *errtype.InvalidInput:
 			fmt.Fprintf(os.Stderr, "%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", err, usage, description)
 			if flagset != nil {
 				flagset.PrintDefaults()

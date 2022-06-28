@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+
+	"github.com/mcdonaldseanp/clibuild/errtype"
 )
 
 // Validators should take a string that looks something like:
@@ -26,32 +28,50 @@ func ValidateParams(params string) error {
 	// validate
 	err := json.Unmarshal([]byte(params), &unmarshald_data)
 	if err != nil {
-		return fmt.Errorf("failed to parse validator as yaml:\n%s", err)
+		return &errtype.InvalidInput{
+			Message: fmt.Sprintf("failed to parse validator as yaml:\n%s", err),
+			Origin:  err,
+		}
 	}
 	for _, data := range unmarshald_data {
 		for _, validate_type := range data.Validate {
 			switch validate_type {
 			case "NotEmpty":
 				if !(len(data.Value) > 0) {
-					return fmt.Errorf("'%s' is empty", data.Name)
+					return &errtype.InvalidInput{
+						Message: fmt.Sprintf("'%s' is empty", data.Name),
+						Origin:  nil,
+					}
 				}
 			case "IsNumber":
 				matcher, _ := regexp.Compile(`^[\d]+$`)
 				if !matcher.Match([]byte(data.Value)) {
-					return fmt.Errorf("'%s' is not a number, given %s", data.Name, data.Value)
+					return &errtype.InvalidInput{
+						Message: fmt.Sprintf("'%s' is not a number, given %s", data.Name, data.Value),
+						Origin:  nil,
+					}
 				}
 			case "IsIP":
 				matcher, _ := regexp.Compile(`^[\d\.]+$`)
 				if !matcher.Match([]byte(data.Value)) {
-					return fmt.Errorf("'%s' is not an IP address, given %s", data.Name, data.Value)
+					return &errtype.InvalidInput{
+						Message: fmt.Sprintf("'%s' is not an IP address, given %s", data.Name, data.Value),
+						Origin:  nil,
+					}
 				}
 			case "IsFile":
 				files, err := filepath.Glob(data.Value)
 				if err != nil {
-					return fmt.Errorf("failed attempting to check if '%s' is a file or directory, failure:\n%s", data.Name, err)
+					return &errtype.InvalidInput{
+						Message: fmt.Sprintf("failed attempting to check if '%s' is a file or directory, failure:\n%s", data.Name, err),
+						Origin:  nil,
+					}
 				}
 				if len(files) < 1 {
-					return fmt.Errorf("'%s' is not a file or directory, given %s", data.Name, data.Value)
+					return &errtype.InvalidInput{
+						Message: fmt.Sprintf("'%s' is not a file or directory, given %s", data.Name, data.Value),
+						Origin:  nil,
+					}
 				}
 			default:
 				return fmt.Errorf("unknown matcher: %s", validate_type)
