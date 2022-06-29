@@ -84,7 +84,6 @@ func printTopUsage(tool_name string, command_list []Command) {
 // If the command succeeds handleCommandAirer exits the whole go process
 // with code 0
 func HandleCommandError(err error, usage string, description string, flagset *flag.FlagSet) {
-	fmt.Printf("\n%T\n", error(err))
 	if error(err) != nil {
 		switch err.(type) {
 		case *errtype.InvalidInput:
@@ -108,14 +107,34 @@ func RunCommand(tool_name string, tool_version string, command_list []Command) {
 			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := tool_name + " update version [VERSION FILE] [NEW VERSION]"
-				description := "Update " + tool_name + "'s version, defaults to the next Z release if no [NEW VERSION] is given"
-				ShouldHaveArgs(1, usage, description, nil)
+				description := "Update " + tool_name + "'s version"
+				ShouldHaveArgs(2, usage, description, nil)
 				new_version := ""
 				if len(os.Args) > 4 {
 					new_version = os.Args[4]
 				}
 				HandleCommandError(
 					clivrsn.UpdateVersion(os.Args[3], new_version),
+					usage,
+					description,
+					nil,
+				)
+			},
+		},
+		{
+			Verb:     "read",
+			Noun:     "nextz",
+			Supports: []string{"linux", "windows"},
+			ExecutionFn: func() {
+				usage := tool_name + " read nextz [VERSION FILE]"
+				description := "Read " + tool_name + "'s next Z release version"
+				ShouldHaveArgs(1, usage, description, nil)
+				zver, err := clivrsn.ReadNextZ(os.Args[3])
+				if err == nil {
+					fmt.Print(zver)
+				}
+				HandleCommandError(
+					err,
 					usage,
 					description,
 					nil,

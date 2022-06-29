@@ -11,7 +11,11 @@ import (
 	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
-func readVersion(raw_bytes []byte) (string, error) {
+func readVersion(version_file string) (string, error) {
+	raw_bytes, arr := readFileInChunks(version_file)
+	if arr != nil {
+		return "", arr
+	}
 	lines := strings.Split(string(raw_bytes), "\n")
 	for _, line := range lines {
 		if strings.HasPrefix(line, "const VERSION string") {
@@ -22,17 +26,6 @@ func readVersion(raw_bytes []byte) (string, error) {
 		}
 	}
 	return "", errors.New("could not find version")
-}
-
-func nextZ(ver string) (string, error) {
-	split_ver := strings.Split(ver, ".")
-	z_release, err := strconv.Atoi(split_ver[2])
-	if err != nil {
-		return "", fmt.Errorf("could not bump to next Z version, atoi conversion failed: %s", err)
-	}
-	z_release++
-	split_ver[2] = strconv.Itoa(z_release)
-	return strings.Join(split_ver, "."), nil
 }
 
 func overwriteFile(location string, data []byte) error {
@@ -77,9 +70,11 @@ func readFileInChunks(location string) ([]byte, error) {
 func UpdateVersion(version_file string, new_version string) error {
 	err := validator.ValidateParams(fmt.Sprintf(
 		`[
-			{"name":"version_file","value":"%s","validate":["NotEmpty", "IsFile"]}
+			{"name":"version_file","value":"%s","validate":["NotEmpty", "IsFile"]},
+			{"name":"new_version","value":"%s","validate":["NotEmpty"]}
 		 ]`,
 		version_file,
+		new_version,
 	))
 	if err != nil {
 		return err
@@ -87,16 +82,6 @@ func UpdateVersion(version_file string, new_version string) error {
 	raw_bytes, arr := readFileInChunks(version_file)
 	if arr != nil {
 		return arr
-	}
-	if len(new_version) < 1 {
-		old_version, arr := readVersion(raw_bytes)
-		if arr != nil {
-			return arr
-		}
-		new_version, arr = nextZ(old_version)
-		if arr != nil {
-			return arr
-		}
 	}
 	lines := strings.Split(string(raw_bytes), "\n")
 	var result string
@@ -117,6 +102,29 @@ func UpdateVersion(version_file string, new_version string) error {
 	if arr != nil {
 		return arr
 	}
-	fmt.Print(new_version)
 	return nil
+}
+
+func ReadNextZ(version_file string) (string, error) {
+	err := validator.ValidateParams(fmt.Sprintf(
+		`[
+			{"name":"version_file","value":"%s","validate":["NotEmpty", "IsFile"]}
+		 ]`,
+		version_file,
+	))
+	if err != nil {
+		return "", err
+	}
+	old_version, arr := readVersion(version_file)
+	if arr != nil {
+		return "", arr
+	}
+	split_ver := strings.Split(old_version, ".")
+	z_release, err := strconv.Atoi(split_ver[2])
+	if err != nil {
+		return "", fmt.Errorf("could not read next Z version, atoi conversion failed: %s", err)
+	}
+	z_release++
+	split_ver[2] = strconv.Itoa(z_release)
+	return strings.Join(split_ver, "."), nil
 }
