@@ -143,7 +143,12 @@ func RunCommand(tool_name string, tool_version string, command_list []Command) {
 		},
 	}
 	command_list = append(command_list, default_command_list...)
+	RunCommandRaw(tool_name, tool_version, command_list)
+}
 
+// The "Raw" version of RunCommand does not contain the default commands
+// 'update version' and 'read nextz'.
+func RunCommandRaw(tool_name string, tool_version string, command_list []Command) {
 	if len(os.Args) > 2 {
 		for _, command := range command_list {
 			if os.Args[1] == command.Verb && os.Args[2] == command.Noun && osSupportsCommand(command) {
