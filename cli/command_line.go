@@ -28,7 +28,7 @@ func ShouldHaveArgs(num_args int, usage string, description string, flagset *fla
 	real_args := num_args + 3
 	passed_fs := flagset != nil
 	for index, arg := range os.Args {
-		if arg == "-h" {
+		if arg == "-h" || arg == "--help" {
 			fmt.Fprintf(os.Stderr, "Usage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
 			if passed_fs {
 				fmt.Fprintf(os.Stderr, "Available flags:\n")
