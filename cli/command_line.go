@@ -19,9 +19,9 @@ type Command struct {
 }
 
 // shouldHaveArgs does two things:
-// * validate that the number of args that aren't flags have been provided (i.e. the number of strings
-//    after the command name that aren't flags)
-// * parse the remaining flags
+//   - validate that the number of args that aren't flags have been provided (i.e. the number of strings
+//     after the command name that aren't flags)
+//   - parse the remaining flags
 //
 // If the wrong number of args is passed it prints helpful usage
 func ShouldHaveArgs(num_args int, usage string, description string, flagset *flag.FlagSet) {
